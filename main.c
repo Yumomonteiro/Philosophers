@@ -3,19 +3,33 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yude-oli <yude-oli@student.42lisboa.com    +#+  +:+       +#+        */
+/*   By: yude-oli <yude-oli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 16:03:52 by yude-oli          #+#    #+#             */
-/*   Updated: 2024/11/09 14:27:23 by yude-oli         ###   ########.fr       */
+/*   Updated: 2024/11/19 15:19:58 by yude-oli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "includes/philo.h"
+
 // compile if 
 // ./philo num_philo "time_to_die" 
 //"time_to_eat time_to_sleep" "number_of_times_eat"
 //fsanitaze=thread
 //valgrind --tool=helgrind
+int all_philosophers_ate_enough(t_table *table)
+{
+    int i;
+
+    for (i = 0; i < table->num_philo; i++)
+    {
+        if (table->philosophers[i].meals_eaten < table->num_phil_must_eat)
+        {
+            return 0;  // Se algum filósofo não comeu o número necessário de vezes
+        }
+    }
+    return 1;  // Todos os filósofos comeram o número necessário de vezes
+}
 
 int	check_args(int ac, char *av[])
 {
@@ -29,57 +43,70 @@ int	check_args(int ac, char *av[])
 	return (0);
 }
 
-void	init_forks_and_philos(t_table *table)
+void	join_threads(t_table *table)
 {
 	int	i;
 
 	i = 0;
 	while (i < table->num_philo)
 	{
-		pthread_mutex_init(&table->forks[i], NULL);
-		i++;
-	}
-	i = 0;
-	while (i < table->num_philo)
-	{
-		table->philosophers[i].id = i + 1;
-		table->philosophers[i].meals_eaten = 0;
-		table->philosophers[i].last_meal_time = 0;
-		table->philosophers[i].table = table;
+		pthread_join(table->philosophers[i].thread, NULL);
 		i++;
 	}
 }
-int	init_var(int ac, char **av, t_table *table)
+
+void free_resources(t_table *table)
 {
-	table->num_philo = ft_atoi(av[1]);
-	table->t_to_die = ft_atoi(av[2]);
-	table->t_to_eat = ft_atoi(av[3]);
-	table->t_to_sleep = ft_atoi(av[4]);
-	table->num_phil_must_eat = 0;
-	if (ac == 6)
-		table->num_phil_must_eat = ft_atoi(av[5]);
-	table->philosophers = malloc(sizeof(t_philosopher) * table->num_philo);
-	table->forks = malloc(sizeof(t_table) * table->num_philo);
-	if (!table->philosophers || !table->forks)
-		return (1);
-	init_forks_and_philos(table);
-	pthread_mutex_init(&table->print_mutex, NULL);
-	return (0);
+    int i;
+    for (i = 0; i < table->num_philo; i++)
+        pthread_mutex_destroy(&table->forks[i]);
+
+    pthread_mutex_destroy(&table->print_mutex);
+    pthread_mutex_destroy(&table->simulation_mutex);
+    free(table->forks);
+    free(table->philosophers);
 }
 
-int	main(int ac, char *av[])
+int main(int ac, char *av[])
 {
-	t_table	table;
+    t_table table;
+    pthread_t monitor_thread;
 
-	if (check_args(ac, av) == 1)
-	{
-		printf("wrong args\n");
-		return (0);
-	}
-	if (init_var(ac, av, &table) == 0)
-	{
+    if (check_args(ac, av) == 1)
+    {
+        printf("wrong args\n");
+        return (1);
+    }
+    if (init_var(ac, av, &table) != 0)
+    {
+        printf("Initialization failed\n");
+        return (1);
+    }
+    if (create_threads(&table) != 0)
+    {
+        free_resources(&table);
+        return (1);
+    }
 
-	}
-	//free_all function
-	return (0);
+    if (pthread_create(&monitor_thread, NULL, monitor, &table) != 0)
+    {
+        printf("Error creating monitor thread\n");
+        free_resources(&table);
+        return (1);
+    }
+
+    pthread_join(monitor_thread, NULL);
+    
+    pthread_mutex_lock(&table.simulation_mutex);
+    table.simulation_end = 1;
+    pthread_mutex_unlock(&table.simulation_mutex);
+    join_threads(&table);
+    printf("END OF SIMULATION\n");
+    free_resources(&table);
+    return (0);
 }
+
+
+
+
+
