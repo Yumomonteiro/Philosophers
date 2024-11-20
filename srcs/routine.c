@@ -6,67 +6,71 @@
 /*   By: yude-oli <yude-oli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/19 13:33:22 by yude-oli          #+#    #+#             */
-/*   Updated: 2024/11/19 18:30:42 by yude-oli         ###   ########.fr       */
+/*   Updated: 2024/11/20 16:07:17 by yude-oli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/philo.h"
-void    ft_usleep(int time)
+
+int	someone_died(t_philo *philo)
 {
-    long long i = 0;
-    i = get_current_time() + time;
-    while(get_current_time() <= i)
-    {
-        usleep(500);
-    }
-    
+	print_routine(philo, DIE);
+	philo->tab->over = 1;
+	philo->dead = 1;
+	pthread_mutex_unlock(philo->l_fork);
+	pthread_mutex_unlock(philo->r_fork);
+	return (1);
 }
-void *routine(void *arg)
+
+int	check_death(t_philo *philo)
 {
-    t_philosopher *philosopher = (t_philosopher *)arg;
-    t_table *table = philosopher->table;
+	long int	now;
 
-    while (1)
-    {
-        // Verifica se a simulação acabou
-        pthread_mutex_lock(&table->simulation_mutex);
-        if (table->simulation_end)
-        {
-            pthread_mutex_unlock(&table->simulation_mutex);
-            return NULL; // Sai da thread
-        }
-        pthread_mutex_unlock(&table->simulation_mutex);
+	pthread_mutex_lock(philo->tab->death);
+	now = get_time() - philo->meal;
+	if (now >= philo->tab->t_to_die)
+	{
+		pthread_mutex_unlock(philo->tab->death);
+		return (someone_died(philo));
+	}
+	pthread_mutex_unlock(philo->tab->death);
+	return (0);
+}
 
-        // Caso especial: Apenas 1 filósofo
-        if (table->num_philo == 1)
-        {
-            ft_usleep(table->t_to_die * 1000); // Espera até "morrer"
-            continue; // Não tenta pegar garfos
-        }
+void	ft_sleep_and_think(t_philo *philo)
+{
+	ft_usleep(philo->tab->t_to_sleep);
+	print_routine(philo, SLEEP);
+	print_routine(philo, THINK);
+}
 
-        // Pensando
-        log_action(philosopher, "is thinking");
-        usleep(table->t_to_think * 1000);
+void	ft_eat(t_philo *philo)
+{
+	pthread_mutex_lock(philo->l_fork);
+	print_routine(philo, FORK);
+	pthread_mutex_lock(philo->r_fork);
+	print_routine(philo, FORK);
+	philo->meal = get_time();
+	ft_usleep(philo->tab->t_to_eat);
+	print_routine(philo, EAT);
+	philo->iter_num++;
+	pthread_mutex_unlock(philo->l_fork);
+	pthread_mutex_unlock(philo->r_fork);
+}
 
-        // Pegando os garfos
-        pthread_mutex_lock(&table->forks[philosopher->id - 1]);
-        log_action(philosopher, "has taken a fork");
-        pthread_mutex_lock(&table->forks[philosopher->id % table->num_philo]);
-        log_action(philosopher, "has taken a fork");
+void	*thread_routine(void *job)
+{
+	t_philo	*philo;
 
-        // Comendo
-        log_action(philosopher, "is eating");
-        philosopher->last_meal_time = get_current_time();
-        philosopher->meals_eaten++;
-        usleep(table->t_to_eat * 1000);
-
-        // Devolvendo os garfos
-        pthread_mutex_unlock(&table->forks[philosopher->id % table->num_philo]);
-        pthread_mutex_unlock(&table->forks[philosopher->id - 1]);
-
-        // Dormindo
-        log_action(philosopher, "is sleeping");
-        usleep(table->t_to_sleep * 1000);
-    }
-    return NULL;
+	philo = (t_philo *)job;
+	while (!philo->tab->ready)
+		continue ;
+	if (philo->id & 1)
+		ft_usleep(philo->tab->t_to_eat * 0.9 + 1);
+	while (!philo->tab->over)
+	{
+		ft_eat(philo);
+		ft_sleep_and_think(philo);
+	}
+	return (NULL);
 }

@@ -1,7 +1,6 @@
 #ifndef PHILO_H
 # define PHILO_H
 
-# include "../libs/libft/libft.h"
 # include <stdlib.h>
 # include <unistd.h>
 # include <stdio.h>
@@ -16,42 +15,52 @@
 # include <sys/stat.h>
 #include <sys/time.h>
 
-typedef struct s_philosopher
-{
-	int				id;
-	int				meals_eaten;
-	long long		last_meal_time;
-	pthread_t		thread;
-	pthread_mutex_t philo_mutex;
-	struct s_table	*table; // Referência à mesa
-}				t_philosopher;
+# define LEFT 0
+# define RIGHT 1
+# define FORK "has taken a fork"
+# define EAT "is eating"
+# define SLEEP "is sleeping"
+# define THINK "is thinking"
+# define DIE "\e[0;31mDIED\e[m"
 
 typedef struct s_table
 {
-	pthread_mutex_t	*forks;            // Mutexes para os garfos
-	t_philosopher	*philosophers;     // Array de filósofos
-	int				num_philo;         // Número de filósofos
-	int				t_to_die;          // Tempo para morrer
-	int				t_to_eat;          // Tempo para comer
-	int 			t_to_think;
-	int				t_to_sleep;        // Tempo para dormir
-	int				num_phil_must_eat; // Número de refeições necessárias (opcional)
-	int				finished_eating;   // Contador de refeições concluídas
-	int				simulation_end;    // Flag para indicar o término da simulação
-	pthread_mutex_t	print_mutex;       // Mutex para impressões
-	pthread_mutex_t	simulation_mutex;  // Mutex para controle da simulação
-	long long		start_time;        // Tempo inicial da simulação
+	int				num;
+	int				ready;
+	int				t_to_die;
+	int				t_to_eat;
+	int				t_to_sleep;
+	int				max_iter;
+	int				check_meal;
+	int				over;
+	long int		start;
+	pthread_mutex_t	*death;
+	pthread_mutex_t	*fork;
 }				t_table;
 
-void    ft_usleep(int time);
-long long	get_current_time(void);
-void	*routine(void *arg);
-void log_action(t_philosopher *philosopher, const char *action);
-void	join_threads(t_table *table);
-void	init_forks_and_philos(t_table *table);
-int	init_var(int ac, char **av, t_table *table);
-int all_philosophers_ate_enough(t_table *table);
-void *monitor(void *arg);
-int	create_threads(t_table *table);
+typedef struct s_philo
+{
+	int				id;
+	int				dead;
+	int				iter_num;
+	long int		thread_start;
+	long int		meal;
+	pthread_t		life_tid;
+	pthread_mutex_t	*l_fork;
+	pthread_mutex_t	*r_fork;
+	t_table		*tab;
+}	t_philo;
+
+
+int			ft_atoi(const char *str);
+int			ft_usleep(long int time);
+int			philo(t_table *table);
+int			init_philo(t_table *table, t_philo *philo);
+int			error_msg(char *s, t_table *table, t_philo *philo, int malloc);
+void		*thread_routine(void *job);
+void		final_print(int alive);
+void		print_routine(t_philo *p, char *action);
+int			check_death(t_philo *p);
+long int	get_time(void);
 
 #endif

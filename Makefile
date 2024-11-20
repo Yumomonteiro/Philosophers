@@ -1,29 +1,25 @@
 NAME    = philo
 CC      = cc -g
-CFLAGS  = -Wall -Wextra -Werror -g #-fsanitize=thread
+CFLAGS  = -Wall -Wextra -Werror -g -fsanitize=thread
 
 SRCS    = main.c \
-			srcs/init.c srcs/monitor.c srcs/routine.c srcs/time.c srcs/print_action.c
+			srcs/ft_atoi.c srcs/philo.c srcs/routine.c srcs/time.c srcs/utils.c
 
 OBJS    = $(SRCS:.c=.o)
 
-LIBFT   = libs/libft/libft.a
 
 all: $(NAME)
 
-$(NAME): $(LIBFT) $(OBJS)
-	$(CC) $(CFLAGS) -o $(NAME) $(OBJS) $(LIBFT)
-
-$(LIBFT):
-	make -C libs/libft -s
+$(NAME): $(OBJS)
+	$(CC) $(CFLAGS) -o $(NAME) $(OBJS)
 
 clean:
 	$(RM) $(OBJS)
-	make clean -C libs/libft -s
+	make clean
 
 fclean: clean
 	$(RM) $(NAME)
-	make fclean -C libs/libft -s
+	make fclean
 
 re: fclean all
 
