@@ -6,7 +6,7 @@
 /*   By: yude-oli <yude-oli@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 16:03:52 by yude-oli          #+#    #+#             */
-/*   Updated: 2024/11/20 15:58:24 by yude-oli         ###   ########.fr       */
+/*   Updated: 2024/11/20 16:18:42 by yude-oli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,9 @@ int main(int ac, char *av[])
 {
    t_table table;
 
-    if (check_args(ac, av) == 1 || init_var(&table, av) != 0)
+    if (check_args(ac, av) == 1)
+		return(0);
+	if(init_var(&table, av) != 0)
         return (error_msg("Error: invalid arguments\n", &table, 0, 1));
     if (philo(&table))
         return(0);
