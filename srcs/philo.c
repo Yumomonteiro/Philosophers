@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yude-oli <yude-oli@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yude-oli <yude-oli@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 13:25:38 by yude-oli          #+#    #+#             */
-/*   Updated: 2024/11/20 16:06:39 by yude-oli         ###   ########.fr       */
+/*   Updated: 2024/11/21 14:54:23 by yude-oli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,15 +24,27 @@ static int	check_meals(t_philo p, int last)
 static void	check_thread(t_table *table, t_philo *philo)
 {
 	int	i;
-
-	while (!table->ready)
-		continue ;
+        while(1)
+        {
+                pthread_mutex_lock(table->ready_mutex);
+                if(table->ready)
+                {
+                        pthread_mutex_unlock(table->ready_mutex);
+                        break;
+                }
+                pthread_mutex_unlock(table->ready_mutex);
+        }
 	while (!table->over)
 	{
 		i = -1;
 		while (++i < table->num)
 			if (check_death(&philo[i]) || check_meals(philo[i], i))
+                        {
+                                pthread_mutex_lock(table->death);
 				table->over = 1;
+                                pthread_mutex_unlock(table->death);
+
+                        }
 	}
 	if (table->check_meal && philo[table->num - 1].iter_num == table->max_iter)
 	{
@@ -63,7 +75,9 @@ static int	init_thread(t_table *table, t_philo *philo)
 		philo[i].thread_start = table->start;
 		philo[i].meal = table->start;
 	}
+        pthread_mutex_lock(table->ready_mutex);
 	table->ready = 1;
+        pthread_mutex_unlock(table->ready_mutex);
 	return (0);
 }
 
@@ -76,6 +90,8 @@ static void	end_thread(t_table *table, t_philo *philo)
 		pthread_join(philo[i].life_tid, (void *)&philo[i]);
 	pthread_mutex_destroy(table->death);
 	pthread_mutex_destroy(table->fork);
+        pthread_mutex_destroy(table->ready_mutex);
+        free(table->ready_mutex);
 	free(table->death);
 	free(table->fork);
 	free(philo);

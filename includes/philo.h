@@ -34,6 +34,7 @@ typedef struct s_table
 	int				check_meal;
 	int				over;
 	long int		start;
+        pthread_mutex_t *ready_mutex;
 	pthread_mutex_t	*death;
 	pthread_mutex_t	*fork;
 }				t_table;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yude-oli <yude-oli@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yude-oli <yude-oli@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 16:03:52 by yude-oli          #+#    #+#             */
-/*   Updated: 2024/11/20 16:18:42 by yude-oli         ###   ########.fr       */
+/*   Updated: 2024/11/21 14:10:52 by yude-oli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,9 @@ static int	init_params_mutex(t_table *table)
 	table->death = 0;
 	table->fork = 0;
 	table->death = malloc(sizeof(pthread_mutex_t));
+        table->ready_mutex = malloc(sizeof(pthread_mutex_t));
+        if(!table->ready_mutex)
+                return (1);
 	if (!table->death)
 		return (error_msg("Error\nMutex death: malloc failed\n", table, 0, 1));
 	table->fork = malloc(sizeof(pthread_mutex_t) * table->num);
@@ -115,7 +118,7 @@ int main(int ac, char *av[])
    t_table table;
 
     if (check_args(ac, av) == 1)
-		return(0);
+		return(printf("\033[0;31m  philo error 01: Error: invalid args\033[0m\n"), 0);
 	if(init_var(&table, av) != 0)
         return (error_msg("Error: invalid arguments\n", &table, 0, 1));
     if (philo(&table))
