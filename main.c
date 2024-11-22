@@ -6,7 +6,7 @@
 /*   By: yude-oli <yude-oli@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 16:03:52 by yude-oli          #+#    #+#             */
-/*   Updated: 2024/11/21 14:10:52 by yude-oli         ###   ########.fr       */
+/*   Updated: 2024/11/22 13:36:21 by yude-oli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,6 @@ int	error_msg(char *s, t_table *table, t_philo *philo, int malloc)
 {
 	if (malloc)
 	{
-		if (table->death)
-			free(table->death);
 		if (table->fork)
 			free(table->fork);
 		if (philo)
@@ -65,19 +63,14 @@ static int	init_params_mutex(t_table *table)
 	int	i;
 
 	i = -1;
-	table->death = 0;
 	table->fork = 0;
-	table->death = malloc(sizeof(pthread_mutex_t));
-        table->ready_mutex = malloc(sizeof(pthread_mutex_t));
-        if(!table->ready_mutex)
-                return (1);
-	if (!table->death)
-		return (error_msg("Error\nMutex death: malloc failed\n", table, 0, 1));
+        pthread_mutex_init(&table->death, NULL);
+        pthread_mutex_init(&table->ready_mutex, NULL);
+        pthread_mutex_init(&table->turn_mutex, NULL);
+      
 	table->fork = malloc(sizeof(pthread_mutex_t) * table->num);
 	if (!table->fork)
 		return (error_msg("Error\nMutex fork: malloc failed\n", table, 0, 1));
-	if (pthread_mutex_init(table->death, NULL) == -1)
-		return (error_msg("Error\nMutex init failed\n", table, 0, 1));
 	while (++i < table->num)
 		if (pthread_mutex_init(&table->fork[i], NULL) == -1)
 			return (error_msg("Error\nMutex init failed\n", table, 0, 1));
@@ -97,6 +90,7 @@ static int	init_var(t_table *table, char **ag)
 	table->check_meal = 0;
 	table->start = 0;
 	table->ready = 0;
+        table->turn = 0;
 	if (ag[5])
 	{
 		table->check_meal = 1;
