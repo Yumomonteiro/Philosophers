@@ -21,7 +21,6 @@ int	ft_isdigit(int c)
 void	ft_display_exit(void)
 {
 	printf("Wrong args\n");
-	return ;
 }
 int	ft_atoi(const char *str)
 {
@@ -39,12 +38,12 @@ int	ft_atoi(const char *str)
 	while (*str <= 57 && *str >= 48)
 	{
 		if (!ft_isdigit(*str) && *str != '\0')
-			ft_display_exit();
+                        return (-1);
 		y = (y * 10) + ((*str - 48) % 10);
 		str++;
 	}
 	if (!ft_isdigit(*str) && *str != '\0')
-		ft_display_exit();
+                return (-1);
 	y *= x;
 	if (y > 2147483647 || y < -2147483648)
 		ft_display_exit();

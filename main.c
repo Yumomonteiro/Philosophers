@@ -6,7 +6,7 @@
 /*   By: yude-oli <yude-oli@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 16:03:52 by yude-oli          #+#    #+#             */
-/*   Updated: 2024/11/22 13:36:21 by yude-oli         ###   ########.fr       */
+/*   Updated: 2024/11/23 14:41:31 by yude-oli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int	init_philo(t_table *table, t_philo *philo)
 	i = -1;
 	while (++i < table->num)
 	{
-		philo[i].id = i;
+		philo[i].id = i + 1;
 		philo[i].dead = 0;
 		philo[i].iter_num = 0;
 		philo[i].thread_start = 0;
