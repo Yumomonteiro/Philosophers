@@ -6,7 +6,7 @@
 /*   By: yude-oli <yude-oli@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/19 13:35:18 by yude-oli          #+#    #+#             */
-/*   Updated: 2024/11/23 14:37:56 by yude-oli         ###   ########.fr       */
+/*   Updated: 2024/11/23 16:38:40 by yude-oli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,4 +28,16 @@ int	ft_usleep(long int time)
 	while ((get_time() - start_time) < time)
 		usleep(100);
 	return (1);
+}
+
+int	error_msg(char *s, t_table *table, t_philo *philo, int malloc)
+{
+	if (malloc)
+	{
+		if (table->fork)
+			free(table->fork);
+		if (philo)
+			free(philo);
+	}
+	return (printf("%s", s));
 }

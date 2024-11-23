@@ -6,39 +6,24 @@
 /*   By: yude-oli <yude-oli@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/08 16:03:52 by yude-oli          #+#    #+#             */
-/*   Updated: 2024/11/23 14:41:31 by yude-oli         ###   ########.fr       */
+/*   Updated: 2024/11/23 16:51:27 by yude-oli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "includes/philo.h"
 
-// compile if 
-// ./philo num_philo "time_to_die" 
-//"time_to_eat time_to_sleep" "number_of_times_eat"
-//fsanitaze=thread
-//valgrind --tool=helgrind
-int	error_msg(char *s, t_table *table, t_philo *philo, int malloc)
-{
-	if (malloc)
-	{
-		if (table->fork)
-			free(table->fork);
-		if (philo)
-			free(philo);
-	}		
-	return (printf("%s", s));
-}
 int	check_args(int ac, char *av[])
 {
 	if (ac < 5 || ac > 6)
 		return (1);
-	if (ft_atoi(av[1]) <= 0 || ft_atoi(av[2]) <= 0 || ft_atoi(av[3]) <=0
+	if (ft_atoi(av[1]) <= 0 || ft_atoi(av[2]) <= 0 || ft_atoi(av[3]) <= 0
 		|| ft_atoi(av[4]) <= 0)
 		return (1);
 	if (ft_atoi(av[1]) > 200)
 		return (1);
 	return (0);
 }
+
 int	init_philo(t_table *table, t_philo *philo)
 {
 	int	i;
@@ -64,10 +49,9 @@ static int	init_params_mutex(t_table *table)
 
 	i = -1;
 	table->fork = 0;
-        pthread_mutex_init(&table->death, NULL);
-        pthread_mutex_init(&table->ready_mutex, NULL);
-        pthread_mutex_init(&table->turn_mutex, NULL);
-      
+	pthread_mutex_init(&table->death, NULL);
+	pthread_mutex_init(&table->ready_mutex, NULL);
+	pthread_mutex_init(&table->turn_mutex, NULL);
 	table->fork = malloc(sizeof(pthread_mutex_t) * table->num);
 	if (!table->fork)
 		return (error_msg("Error\nMutex fork: malloc failed\n", table, 0, 1));
@@ -86,41 +70,33 @@ static int	init_var(t_table *table, char **ag)
 	table->t_to_die = ft_atoi(ag[2]);
 	table->t_to_eat = ft_atoi(ag[3]);
 	table->t_to_sleep = ft_atoi(ag[4]);
-	table->max_iter = -2;
+	table->max_eat = -2;
 	table->check_meal = 0;
 	table->start = 0;
 	table->ready = 0;
-        table->turn = 0;
+	table->turn = 0;
 	if (ag[5])
 	{
 		table->check_meal = 1;
-		table->max_iter = ft_atoi(ag[5]);
+		table->max_eat = ft_atoi(ag[5]);
 	}
 	table->over = 0;
 	if (table->num > 0)
 		mutex = init_params_mutex(table);
-	return (mutex || table->num <= 0 || table->t_to_die <= 0 || table->t_to_eat <= 0
-		|| table->t_to_sleep <= 0 || table->max_iter == 0);
+	return (mutex || table->num <= 0 || table->t_to_die <= 0
+		|| table->t_to_eat <= 0 || table->t_to_sleep <= 0
+		|| table->max_eat == 0);
 }
-int    ft_error(void)
+
+int	main(int ac, char *av[])
 {
-    printf("\033[0;31mError : invalid arguments\033[0m\n");
-    return (0);
+	t_table	table;
+
+	if (check_args(ac, av) == 1)
+		return (printf("\033[0;31mError: invalid args\033[0m\n"), 0);
+	if (init_var(&table, av) != 0)
+		return (error_msg("Error: invalid arguments\n", &table, 0, 1));
+	if (philo(&table))
+		return (0);
+	return (0);
 }
-int main(int ac, char *av[])
-{
-   t_table table;
-
-    if (check_args(ac, av) == 1)
-		return(printf("\033[0;31m  philo error 01: Error: invalid args\033[0m\n"), 0);
-	if(init_var(&table, av) != 0)
-        return (error_msg("Error: invalid arguments\n", &table, 0, 1));
-    if (philo(&table))
-        return(0);
-    return (0);
-}
-
-
-
-
-
