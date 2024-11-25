@@ -6,7 +6,7 @@
 /*   By: yude-oli <yude-oli@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/23 16:43:53 by yude-oli          #+#    #+#             */
-/*   Updated: 2024/11/23 17:10:51 by yude-oli         ###   ########.fr       */
+/*   Updated: 2024/11/25 11:06:02 by yude-oli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,5 +80,7 @@ int		check_death(t_philo *p);
 int		init_thread(t_table *table, t_philo *philo);
 void		end_thread(t_table *table, t_philo *philo);
 long int	get_time(void);
+void	take_forks(t_philo *p);
+void	return_forks(t_philo *p);
 
 #endif

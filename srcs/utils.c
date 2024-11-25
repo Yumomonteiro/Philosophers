@@ -6,7 +6,7 @@
 /*   By: yude-oli <yude-oli@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 15:54:40 by yude-oli          #+#    #+#             */
-/*   Updated: 2024/11/23 17:03:25 by yude-oli         ###   ########.fr       */
+/*   Updated: 2024/11/25 11:05:48 by yude-oli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,16 +73,13 @@ void	ft_eat(t_philo *philo)
 		pthread_mutex_unlock(philo->l_fork);
 		return ;
 	}
-	pthread_mutex_lock(philo->r_fork);
-	print_routine(philo, FORK);
-	pthread_mutex_lock(philo->l_fork);
-	print_routine(philo, FORK);
+        
+	take_forks(philo);
 	pthread_mutex_lock(&philo->tab->death);
 	philo->meal = get_time();
 	philo->iter_num++;
 	pthread_mutex_unlock(&philo->tab->death);
 	ft_usleep(philo->tab->t_to_eat);
 	print_routine(philo, EAT);
-	pthread_mutex_unlock(philo->l_fork);
-	pthread_mutex_unlock(philo->r_fork);
+	return_forks(philo);
 }

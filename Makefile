@@ -3,7 +3,7 @@ CC      = cc -g
 CFLAGS  = -Wall -Wextra -Werror -g -fsanitize=thread
 
 SRCS    = main.c \
-			srcs/ft_atoi.c srcs/philo.c srcs/routine.c srcs/time.c srcs/utils.c
+			srcs/ft_atoi.c srcs/philo.c srcs/routine.c srcs/time.c srcs/utils.c srcs/utils2.c
 
 OBJS    = $(SRCS:.c=.o)
 
